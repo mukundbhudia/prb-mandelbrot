@@ -6,17 +6,26 @@ use std::str::FromStr;
 use image::ColorType;
 use image::png::PNGEncoder;
 use::std::fs::File;
+use::std::io::Write;
 
 fn main() {
-    println!("Hello, world!");
-}
+    let args: Vec<String> = std::env::args().collect();
 
-#[allow(dead_code)]
-fn complex_square_add_loop(c: Complex<f64>) {
-    let mut z = Complex { re: 0.0, im: 0.0 };   // We define a struct (structure type) for a complex number
-    loop {
-        z = z * z + c;
+    if args.len() != 5 {
+        writeln!(std::io::stderr(), "Usage: mandelbrot FILE PIXELS UPPERLEFT LOWERRIGHT").unwrap();
+        writeln!(std::io::stderr(), "Example: {} mandel.png 1000x750 -1.20,0.35 -1,0.20", args[0]).unwrap();
+        std::process::exit(1);
     }
+
+    let bounds = parse_pair(&args[2], 'x').expect("error parsing image dimensions");
+    let upper_left = parse_complex(&args[3]).expect("error parsing upper left corner point");
+    let lower_right = parse_complex(&args[4]).expect("error parsing lower right corner point");
+
+    let mut pixels = vec![0; bounds.0 * bounds.1];
+
+    render(&mut pixels, bounds, upper_left, lower_right);
+
+    write_image(&args[1], &pixels, bounds).expect("error writing PNG file");
 }
 
 /// Try to find out if `c` is in the Mandelbrot set, using a max of `limit` iterations to decide
@@ -24,7 +33,6 @@ fn complex_square_add_loop(c: Complex<f64>) {
 /// If `c` is not a member, return `Some(i)` where `i` is the number of iterations taken for `c` to leave
 /// the circle of radius 2 at the origin. If `c` seems to be a member (or more precisley, if we reached the 
 /// iteration limit without being able to prove `c` is not a member), return `None`.
-#[allow(dead_code)]
 fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {        // Option is an enum, and enumerated type
     let mut z = Complex { re: 0.0, im: 0.0 };
     for i in 0..limit {
@@ -43,7 +51,6 @@ fn escape_time(c: Complex<f64>, limit: u32) -> Option<u32> {        // Option is
 /// `seperator` argument, and <left> and <right> are both strings that can be parsed by `T::from_str`.
 /// 
 /// If `s` has the proper form, return `Some <(x,y)>` otherwise if it does not parse, return `None`.
-#[allow(dead_code)]
 fn parse_pair<T: FromStr>(s: &str, sperarator: char) -> Option<(T, T)> {        // A generic function with T as a type parameter
     match s.find(sperarator) {
         None => None,
@@ -68,7 +75,6 @@ fn test_parse_pair() {
 }
 
 /// Parse a pair of floating-point numbers seperated by a comma as a complex number.
-#[allow(dead_code)]
 fn parse_complex(s: &str) -> Option<Complex<f64>> {
     match parse_pair(s, ',') {
         Some((re, im)) => Some(Complex { re, im }),
@@ -87,7 +93,6 @@ fn test_parse_complex() {
 /// `bounds` is a pair giving the height and width of the image in pixels.
 /// `pixel` is a (column, row) pair indicating a particular pixel in that image.None
 /// The `upper_left` and `lower_right` parameters are points on the complex plane designating the area our image covers.
-#[allow(dead_code)]
 fn pixel_to_point(bounds: (usize, usize),
                 pixel: (usize, usize),
                 upper_left: Complex<f64>,
@@ -117,7 +122,6 @@ fn test_pixel_to_point() {
 /// The `bounds` arguments gives the width and height of the buffer `pixels`, which holds
 /// one grayscale pixel per byte. The `upper_left` and `lower_right` arguments specify points
 /// on the complex plane corresponding to the upper-left and lower-right corners of the pixel buffer.assert_eq!
-#[allow(dead_code)]
 fn render(pixels: &mut [u8], bounds: (usize, usize), upper_left: Complex<f64>, lower_right: Complex<f64>) {
     assert!(pixels.len() == bounds.0 * bounds.1);
 
@@ -134,7 +138,6 @@ fn render(pixels: &mut [u8], bounds: (usize, usize), upper_left: Complex<f64>, l
 }
 
 /// Write the buffer `pixels`, whose dimensions are given by `bounds`, to the file named `filename`.
-#[allow(dead_code)]
 fn write_image(filename: &str, pixels: &[u8], bounds: (usize, usize)) -> Result<(), std::io::Error> {
     // () as a return is the unit type, similar to a void function in Java/C/C++
     let output = File::create(filename)?;
