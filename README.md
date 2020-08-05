@@ -11,8 +11,10 @@ This example was taken from the [Programming Rust](https://www.oreilly.com/libra
 
 ## Usage
 
-Within the project directory run `cargo run mandel.png 1000x750 -1.20,0.35 -1,0.20` to generate the image above in this readme.
+Within the project directory run `cargo run mandel.png 1000x750 -1.20,0.35 -1,0.20` to generate the image below in this readme.
 
-### Resources
+![Example mandelbrot set](https://raw.githubusercontent.com/mukundbhudia/prb-mandelbrot/master/output/mandel.png)
+
+## Resources
 * The excellent [Programming Rust](https://www.oreilly.com/library/view/programming-rust/9781491927274/) book.
 * Rust Filesystem docs https://doc.rust-lang.org/std/fs/index.html.
