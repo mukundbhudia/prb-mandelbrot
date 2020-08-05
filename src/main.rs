@@ -6,7 +6,7 @@ use num::Complex;
 use std::str::FromStr;
 use image::ColorType;
 use image::png::PNGEncoder;
-use::std::fs::File;
+use::std::fs::{File, create_dir_all};
 use::std::io::Write;
 
 fn main() {
@@ -161,7 +161,10 @@ fn render(pixels: &mut [u8], bounds: (usize, usize), upper_left: Complex<f64>, l
 /// Write the buffer `pixels`, whose dimensions are given by `bounds`, to the file named `filename`.
 fn write_image(filename: &str, pixels: &[u8], bounds: (usize, usize)) -> Result<(), std::io::Error> {
     // () as a return is the unit type, similar to a void function in Java/C/C++
-    let output = File::create(filename)?;
+    let output_folder = "output/";
+    let full_path = format!("{}{}", output_folder, filename);
+    create_dir_all(output_folder)?;
+    let output = File::create(full_path)?;
 
     let encoder = PNGEncoder::new(output);
     encoder.encode(&pixels, bounds.0 as u32, bounds.1 as u32, ColorType::Gray(8))?;
